@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: users-ws
+  devtools:
+    restart:
+      enabled: true
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+    driverClassName: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+server:
+  port: 8020
+
+eureka:
+  instance:
+    hostname: localhost
+    prefer-ip-address: false  # ????? ??
+    instance-id: ${spring.application.name}:${server.port}  # ???? ID? ???? ??
+  client:
+    registerWithEureka: true      # Eureka ??? ??? ??
+    fetchRegistry: true           # Eureka ????? ??? ??? ???
+    service-url:
+      defaultZone: http://localhost:8010/eureka/  # Eureka ?? ??(?? ?? ??)
+
+
+gateway:
+  ip: 127.0.0.1
