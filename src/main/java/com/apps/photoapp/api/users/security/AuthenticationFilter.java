@@ -65,7 +65,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         Instant now = Instant.now();
 
-
         String token = Jwts.builder()
                 .subject(userDetails.getUserId())
                 .expiration(Date.from(now

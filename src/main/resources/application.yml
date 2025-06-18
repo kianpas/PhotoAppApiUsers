@@ -37,3 +37,7 @@ gateway:
 token:
   expiration-time: 3600000
   secret: dgjorufhrsnjdu438fkdj38fdmcv7dm3ckvhrsnjjuwelueivhe848fhedldh5ndk
+
+login:
+  url:
+    path: /users/login

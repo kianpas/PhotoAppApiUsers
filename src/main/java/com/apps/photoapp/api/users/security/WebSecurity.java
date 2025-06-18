@@ -68,6 +68,7 @@ public class WebSecurity {
         );
         // 3. 커스텀 필터 추가 (DI 활용)
         AuthenticationFilter authenticationFilter = new AuthenticationFilter(usersService, environment, authenticationManager, objectMapper);
+        authenticationFilter.setFilterProcessesUrl(environment.getProperty("login.url.path"));
 
         http.addFilter(authenticationFilter);
         http.authenticationManager(authenticationManager);
