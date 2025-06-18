@@ -1,12 +1,17 @@
 package com.apps.photoapp.api.users.security;
 
+import com.apps.photoapp.api.users.service.UsersService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 
@@ -17,6 +22,12 @@ public class WebSecurity {
 
     private final Environment environment;
 
+    private final ObjectMapper objectMapper;
+
+    private final UsersService usersService;
+
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
     /**
      * HTTP 요청에 대한 보안 설정을 정의하는 SecurityFilterChain 빈을 등록합니다.
      * Spring Security 6.x (Spring Boot 3.x) 스타일의 컴포넌트 기반 설정입니다.
@@ -26,7 +37,16 @@ public class WebSecurity {
      * @throws Exception 설정 중 발생할 수 있는 예외
      */
     @Bean
-    protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
+    protected SecurityFilterChain configure(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder) throws Exception {
+
+        //인증관리 빌더
+        AuthenticationManagerBuilder authenticationManagerBuilder =
+            http.getSharedObject(AuthenticationManagerBuilder.class);
+
+        authenticationManagerBuilder.userDetailsService(usersService).passwordEncoder(bCryptPasswordEncoder);
+
+        AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
+
         // 1. CSRF(Cross-Site Request Forgery) 보호 설정 비활성화
         // REST API 서버와 같이 세션을 상태 없이(stateless) 운영하고, 토큰 기반 인증(예: JWT)을 사용하는 경우
         // CSRF 공격에 상대적으로 안전하며, CSRF 토큰 검증 로직이 불필요할 수 있습니다.
@@ -46,6 +66,11 @@ public class WebSecurity {
                 // 이 설정을 통해 허가되지 않은 접근을 기본적으로 차단하여 보안성을 높입니다.
                 .anyRequest().authenticated() // 이 부분을 추가하여 명시적으로 나머지 요청에 대한 인증 요구를 선언
         );
+        // 3. 커스텀 필터 추가 (DI 활용)
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(usersService, environment, authenticationManager, objectMapper);
+
+        http.addFilter(authenticationFilter);
+        http.authenticationManager(authenticationManager);
 
         // 3. 세션 관리(Session Management) 설정
         // 세션 생성 정책을 STATELESS로 설정합니다.

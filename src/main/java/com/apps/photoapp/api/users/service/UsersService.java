@@ -4,21 +4,21 @@ import com.apps.photoapp.api.users.data.UserEntity;
 import com.apps.photoapp.api.users.data.UsersRepository;
 import com.apps.photoapp.api.users.dto.UserDto;
 import com.apps.photoapp.api.users.utils.UserMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class UsersService {
+public class UsersService implements UserDetailsService {
 
     private final UsersRepository usersRepository;
 
@@ -28,8 +28,6 @@ public class UsersService {
 
     /**
      * 유저 생성
-     * @param userDetails
-     * @return
      */
     @Transactional
     public UserDto createUser(UserDto userDetails) {
@@ -51,9 +49,24 @@ public class UsersService {
         usersRepository.save(userEntity);
 
         //5. 리턴객체 생성
-        UserDto responDto = userMapper.convertEntityToUserDto(userEntity);
 
-        return responDto;
+        return userMapper.convertEntityToUserDto(userEntity);
     }
 
+    public UserDto getUserDetailByEmail(String username) {
+        UserEntity userEntity = usersRepository.findByEmail(username);
+        if (userEntity == null) { throw new UsernameNotFoundException(username); }
+
+        return userMapper.convertEntityToUserDto(userEntity);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserEntity userEntity = usersRepository.findByEmail(username);
+
+        if (userEntity == null) { throw new UsernameNotFoundException(username); }
+
+        return new User(userEntity.getEmail(), userEntity.getEncPassword(),
+                true, true, true, true,new ArrayList<>());
+    }
 }

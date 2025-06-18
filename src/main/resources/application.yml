@@ -33,3 +33,7 @@ eureka:
 
 gateway:
   ip: 127.0.0.1
+
+token:
+  expiration-time: 3600000
+  secret: dgjorufhrsnjdu438fkdj38fdmcv7dm3ckvhrsnjjuwelueivhe848fhedldh5ndk

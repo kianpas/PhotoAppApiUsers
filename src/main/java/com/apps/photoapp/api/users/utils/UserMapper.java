@@ -46,4 +46,5 @@ public class UserMapper {
                 .userId(userEntity.getUserId())
                 .build();
     }
+
 }
