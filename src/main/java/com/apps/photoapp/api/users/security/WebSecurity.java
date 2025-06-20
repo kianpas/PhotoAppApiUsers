@@ -43,8 +43,10 @@ public class WebSecurity {
         AuthenticationManagerBuilder authenticationManagerBuilder =
             http.getSharedObject(AuthenticationManagerBuilder.class);
 
+        //인증관리 빌더에 유저서비스 및 패스워드 인코더 설정
         authenticationManagerBuilder.userDetailsService(usersService).passwordEncoder(bCryptPasswordEncoder);
 
+        //인증 매니저 객체 생성
         AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
 
         // 1. CSRF(Cross-Site Request Forgery) 보호 설정 비활성화
