@@ -2,17 +2,17 @@ package com.apps.photoapp.api.users.controller;
 
 
 import com.apps.photoapp.api.users.dto.UserDto;
-import com.apps.photoapp.api.users.ui.model.CreateUserRequestModel;
 import com.apps.photoapp.api.users.service.UsersService;
+import com.apps.photoapp.api.users.ui.model.CreateUserRequestModel;
 import com.apps.photoapp.api.users.ui.model.CreateUserResponseModel;
 import com.apps.photoapp.api.users.utils.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,13 +28,18 @@ public class UsersController {
     //
     private final UserMapper userMapper;
 
+    private final Environment environment;
+
     @GetMapping("/status/check")
     public String status() {
-        return "Working";
+        return "Working on port " + environment.getProperty("local.server.port");
     }
 
 
-    @PostMapping("")
+    @PostMapping(
+            consumes = {MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
+            produces = {MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_VALUE}
+    )
     public ResponseEntity<CreateUserResponseModel> createUser(@Valid @RequestBody CreateUserRequestModel userDetails){
 
         log.debug("detail = {}", userDetails);
