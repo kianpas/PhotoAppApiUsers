@@ -1,6 +1,8 @@
 spring:
   application:
     name: users-ws
+  config:
+    import: "optional:configserver:"
   devtools:
     restart:
       enabled: true
@@ -16,6 +18,11 @@ spring:
     driverClassName: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+  cloud:
+    config:
+      uri: http://localhost:8012
+      name: PhotoAppApiConfigServer
+
 server:
   port: 8020
 
@@ -23,7 +30,7 @@ eureka:
   instance:
     hostname: localhost
     prefer-ip-address: false  # ????? ??
-    instance-id: ${spring.application.name}:${server.port}  # ???? ID? ???? ??
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}  # ???? ID? ???? ??
   client:
     registerWithEureka: true      # Eureka ??? ??? ??
     fetchRegistry: true           # Eureka ????? ??? ??? ???

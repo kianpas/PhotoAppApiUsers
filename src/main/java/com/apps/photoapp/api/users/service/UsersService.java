@@ -39,17 +39,13 @@ public class UsersService implements UserDetailsService {
                 .userId(UUID.randomUUID().toString())
                 .build();
 
-
         //3. DTO -> 엔티티 전환
         UserEntity userEntity = userMapper.convertToUserEntity(processedUserDto);
-
-
 
         //4. 등록
         usersRepository.save(userEntity);
 
         //5. 리턴객체 생성
-
         return userMapper.convertEntityToUserDto(userEntity);
     }
 

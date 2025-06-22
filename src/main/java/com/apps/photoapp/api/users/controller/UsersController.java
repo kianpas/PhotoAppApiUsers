@@ -36,21 +36,22 @@ public class UsersController {
     }
 
 
-    @PostMapping(
-            consumes = {MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
-            produces = {MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_VALUE}
-    )
+
+    @PostMapping
     public ResponseEntity<CreateUserResponseModel> createUser(@Valid @RequestBody CreateUserRequestModel userDetails){
 
         log.debug("detail = {}", userDetails);
-        System.out.println("Client IP: " + userDetails);
+//        System.out.println("Client IP: " + userDetails);
+        log.debug("Client IP = {}", userDetails);
         //모델 -> DTO
         UserDto userDto = userMapper.convertToUserDto(userDetails);
+        System.out.println("userDto: " + userDto);
         //등록
         UserDto createdUser = usersService.createUser(userDto);
-
+        System.out.println("createdUser: " + createdUser);
         CreateUserResponseModel responseModel = userMapper.convertToUserResModel(createdUser);
 
+        log.info("responseModel: " + responseModel);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseModel);
     }
 
