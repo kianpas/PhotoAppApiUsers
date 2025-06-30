@@ -2,7 +2,7 @@ spring:
   application:
     name: users-ws
   config:
-    import: "optional:configserver:"
+    import: "optional:configserver:http://localhost:8012"
   devtools:
     restart:
       enabled: true
@@ -18,10 +18,11 @@ spring:
     driverClassName: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
-  cloud:
-    config:
-      uri: http://localhost:8012
-      name: PhotoAppApiConfigServer
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 
 server:
   port: 8020
@@ -30,12 +31,12 @@ eureka:
   instance:
     hostname: localhost
     prefer-ip-address: false  # ????? ??
-    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}  # ???? ID? ???? ??
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
   client:
-    registerWithEureka: true      # Eureka ??? ??? ??
-    fetchRegistry: true           # Eureka ????? ??? ??? ???
+    registerWithEureka: true
+    fetchRegistry: true
     service-url:
-      defaultZone: http://localhost:8010/eureka/  # Eureka ?? ??(?? ?? ??)
+      defaultZone: http://localhost:8010/eureka/
 
 
 gateway:

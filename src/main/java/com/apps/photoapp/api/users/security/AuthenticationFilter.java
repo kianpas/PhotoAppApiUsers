@@ -10,6 +10,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,14 +29,20 @@ import java.util.Date;
 
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
+    final Logger log = LoggerFactory.getLogger(AuthenticationFilter.class);
+
+    private final TokenProperties tokenProperties; // 프로퍼티 객체를 직접 주입
+
     private final UsersService usersService;
     private final Environment environment;
     private final ObjectMapper objectMapper; // ObjectMapper가 멤버 변수로 선언되어 있음
 
     // 생성자에서 모든 의존성을 주입받음
     public AuthenticationFilter(UsersService usersService, Environment environment,
-                                AuthenticationManager authenticationManager, ObjectMapper objectMapper) {
+                                AuthenticationManager authenticationManager, ObjectMapper objectMapper,
+                                TokenProperties tokenProperties) {
         super(authenticationManager);
+        this.tokenProperties = tokenProperties;
         this.usersService = usersService;
         this.environment = environment;
         this.objectMapper = objectMapper; // 주입받은 objectMapper를 멤버 변수에 할당
@@ -59,16 +67,20 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                                             FilterChain chain, Authentication authResult) throws IOException, ServletException {
         String userName = ((User) authResult.getPrincipal()).getUsername();
         UserDto userDetails = usersService.getUserDetailByEmail(userName);
-        String tokenSecret = environment.getProperty("token.secret");
+//        String tokenSecret = environment.getProperty("token.secret");
+        String tokenSecret = tokenProperties.getSecret();
         byte[] secretKeyBytes = Base64.getEncoder().encode(tokenSecret.getBytes());
         SecretKey secretKey = Keys.hmacShaKeyFor(secretKeyBytes);
+
+        log.info("tokenSecret = {}", tokenSecret);
+        log.info("expiration = {}", tokenProperties.getExpirationTime());
 
         Instant now = Instant.now();
 
         String token = Jwts.builder()
                 .subject(userDetails.getUserId())
                 .expiration(Date.from(now
-                        .plusMillis(Long.parseLong(environment.getProperty("token.expiration-time")))))
+                        .plusMillis(tokenProperties.getExpirationTime())))
                 .issuedAt(Date.from(now))
                 .signWith(secretKey)
                 .compact();

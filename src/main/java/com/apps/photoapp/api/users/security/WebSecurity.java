@@ -26,6 +26,8 @@ public class WebSecurity {
 
     private final UsersService usersService;
 
+    private final TokenProperties tokenProperties; // 프로퍼티 객체를 직접 주입
+
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     /**
@@ -69,7 +71,7 @@ public class WebSecurity {
                 .anyRequest().authenticated() // 이 부분을 추가하여 명시적으로 나머지 요청에 대한 인증 요구를 선언
         );
         // 3. 커스텀 필터 추가 (DI 활용)
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter(usersService, environment, authenticationManager, objectMapper);
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(usersService, environment, authenticationManager, objectMapper, tokenProperties);
         authenticationFilter.setFilterProcessesUrl(environment.getProperty("login.url.path"));
 
         http.addFilter(authenticationFilter);
